@@ -39,8 +39,11 @@ namespace ParseLib
             {
                 return new KeyValuePair<string, string>("place", text);
             }
-            
-            return new KeyValuePair<string, string>("discipline", text);
+            if (!String.IsNullOrEmpty(text) && !String.IsNullOrWhiteSpace(text))
+            {
+                return new KeyValuePair<string, string>("discipline", text);
+            }
+            return new KeyValuePair<string, string>("error", text);
         }
     }
 
