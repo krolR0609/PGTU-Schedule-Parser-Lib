@@ -4,46 +4,96 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ParseLib.Models;
 
 namespace ParseLib
 {
     public static class ScheduleParser
     {
-        public static List<KeyValuePair<string, string>> Parse(string inputString)
+        public static ValuePair GetValuePair(string text)
+        {
+            ValuePair valuePair = new ValuePair
+            {
+                Value = text,
+                Type = GetItemType(text)
+            };
+            return valuePair;
+        }
+
+        public static IList<ITypeValue> Parse(string inputString)
         {
             string[] resultArray = inputString.Split('\n');
-            List<KeyValuePair<string, string>> resultList = new List<KeyValuePair<string, string>>();
+
+            if (resultArray.Length == 0) throw new NullReferenceException();
+
+            List<ITypeValue> valuePairs = new List<ITypeValue>(resultArray.Length);
 
             foreach (var text in resultArray)
             {
-                resultList.Add(Match(text));
+                valuePairs.Add(ParseString(text));
             }
-            return resultList;
+
+            return valuePairs;
         }
 
-        private static KeyValuePair<string, string> Match(string text)
+        private static ITypeValue ParseString(string text)
         {
             if (text.IsWeek())
             {
-                return new KeyValuePair<string, string>("week", text);
+                return new ValuePair("week", text);
             }
             if (text.IsTime())
             {
-                return new KeyValuePair<string, string>("time", text);
+                return new ValuePair("time", text);
             }
             if (text.IsTeacher())
             {
-                return new KeyValuePair<string, string>("teacher", text);
+                return new ValuePair("teacher", text);
             }
             if (text.IsPlace())
             {
-                return new KeyValuePair<string, string>("place", text);
+                return new ValuePair("place", text);
             }
             if (!String.IsNullOrEmpty(text) && !String.IsNullOrWhiteSpace(text))
             {
-                return new KeyValuePair<string, string>("discipline", text);
+                return new ValuePair("discipline", text);
             }
-            return new KeyValuePair<string, string>("error", text);
+            return new ValuePair("error", text);
+        }
+
+        public static string GetItemType(string text)
+        {
+            if (String.IsNullOrEmpty(text))
+            {
+                return "error";
+            }
+            if (text.IsWeek())
+            {
+                return "week";
+            }
+            if (text.IsTime())
+            {
+                return "time";
+            }
+            if (text.IsTeacher())
+            {
+                return "teacher";
+            }
+            if (text.IsPlace())
+            {
+                return "place";
+            }
+            if (!String.IsNullOrEmpty(text) && !String.IsNullOrWhiteSpace(text))
+            {
+                return "discipline";
+            }
+            return "error";
+        }
+
+        public static IList<IDiscipline> GetDisciplines(string inputString)
+        {
+            IList<ITypeValue> typeValues = Parse(inputString);
+            throw new NotImplementedException();
         }
     }
 
@@ -72,7 +122,5 @@ namespace ParseLib
             Regex regex = new Regex(@"^(по\D\d\D\S*)");
             return regex.IsMatch(text);
         }
-
-        
     }
 }
